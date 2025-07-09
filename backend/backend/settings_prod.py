@@ -12,6 +12,8 @@ DEBUG = False
 ALLOWED_HOSTS = [
     'your-app-name.herokuapp.com',  # Replace with your Heroku app name
     'your-domain.com',              # Replace with your custom domain
+    'your-app-name.onrender.com',   # Replace with your Render app name
+    '.onrender.com',                # For Render deployment
     'localhost',
     '127.0.0.1',
 ]

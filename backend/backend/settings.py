@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.onrender.com',  # For Render deployment
+    'https://drop-zone-backend.onrender.com/'
 ]
 
 
