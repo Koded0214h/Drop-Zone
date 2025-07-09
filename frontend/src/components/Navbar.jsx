@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Vault } from 'lucide-react';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -22,6 +23,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
+            <Vault className="w-8 h-8 text-blue-600 mr-2" />
             <h1 
               className="text-2xl font-bold text-gray-900 cursor-pointer"
               onClick={() => navigate('/')}
