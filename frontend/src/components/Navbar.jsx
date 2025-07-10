@@ -18,39 +18,36 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <nav className="backdrop-blur-md bg-white/70 shadow-xl rounded-2xl mx-2 mt-4 sticky top-0 z-50 border border-blue-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-16 items-center">
           {/* Logo */}
-          <div className="flex items-center">
-            <Vault className="w-8 h-8 text-blue-600 mr-2" />
-            <h1 
-              className="text-2xl font-bold text-gray-900 cursor-pointer"
-              onClick={() => navigate('/')}
-            >
+          <div className="flex items-center gap-2 cursor-pointer select-none" onClick={() => navigate('/')}> 
+            <Vault className="w-9 h-9 text-blue-600" />
+            <span className="text-2xl font-extrabold text-blue-700 tracking-tight">
               DropZone
-            </h1>
+            </span>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {isLoggedIn ? (
               <>
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="text-gray-700 hover:text-blue-600 font-medium transition duration-200"
+                  className="px-4 py-2 rounded-xl font-medium text-gray-700 hover:text-white hover:bg-blue-600 transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={() => navigate('/bookmarks')}
-                  className="text-gray-700 hover:text-blue-600 font-medium transition duration-200"
+                  className="px-4 py-2 rounded-xl font-medium text-gray-700 hover:text-white hover:bg-cyan-600 transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2"
                 >
                   Bookmarks
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                  className="px-4 py-2 rounded-xl font-medium bg-red-500 text-white hover:bg-pink-500 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
                 >
                   Logout
                 </button>
@@ -59,13 +56,13 @@ const Navbar = () => {
               <>
                 <button
                   onClick={() => navigate('/login')}
-                  className="text-gray-700 hover:text-blue-600 font-medium transition duration-200"
+                  className="px-4 py-2 rounded-xl font-medium text-gray-700 hover:text-white hover:bg-blue-600 transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
                 >
                   Login
                 </button>
                 <button
                   onClick={() => navigate('/register')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                  className="px-4 py-2 rounded-xl font-medium bg-blue-600 text-white hover:bg-purple-700 shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
                 >
                   Sign Up
                 </button>
@@ -79,7 +76,7 @@ const Navbar = () => {
               onClick={toggleMenu}
               className="text-gray-700 hover:text-blue-600 focus:outline-none focus:text-blue-600"
             >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 {isMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -92,8 +89,8 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
+          <div className="md:hidden rounded-xl shadow-lg bg-white/90 border border-blue-100 mt-2">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
               {isLoggedIn ? (
                 <>
                   <button
@@ -101,7 +98,7 @@ const Navbar = () => {
                       navigate('/dashboard');
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full text-left px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition duration-200"
+                    className="block w-full text-left px-4 py-2 rounded-xl text-gray-700 hover:text-white hover:bg-blue-600 font-medium transition-all duration-200 shadow-sm"
                   >
                     Dashboard
                   </button>
@@ -110,7 +107,7 @@ const Navbar = () => {
                       navigate('/bookmarks');
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full text-left px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition duration-200"
+                    className="block w-full text-left px-4 py-2 rounded-xl text-gray-700 hover:text-white hover:bg-cyan-600 font-medium transition-all duration-200 shadow-sm"
                   >
                     Bookmarks
                   </button>
@@ -119,7 +116,7 @@ const Navbar = () => {
                       handleLogout();
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full text-left px-3 py-2 text-red-600 hover:text-red-700 font-medium transition duration-200"
+                    className="block w-full text-left px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-pink-500 font-medium transition-all duration-200 shadow-lg"
                   >
                     Logout
                   </button>
@@ -131,7 +128,7 @@ const Navbar = () => {
                       navigate('/login');
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full text-left px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition duration-200"
+                    className="block w-full text-left px-4 py-2 rounded-xl text-gray-700 hover:text-white hover:bg-blue-600 font-medium transition-all duration-200 shadow-sm"
                   >
                     Login
                   </button>
@@ -140,7 +137,7 @@ const Navbar = () => {
                       navigate('/register');
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full text-left px-3 py-2 text-blue-600 hover:text-blue-700 font-medium transition duration-200"
+                    className="block w-full text-left px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-purple-700 font-medium transition-all duration-200 shadow-lg"
                   >
                     Sign Up
                   </button>

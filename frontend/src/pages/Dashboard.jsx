@@ -5,7 +5,7 @@ import api from '../api/axios';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [userEmail, setUserEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [releasedDrops, setReleasedDrops] = useState([]);
   const [bookmarkedDrops, setBookmarkedDrops] = useState([]);
   const [upcomingDrops, setUpcomingDrops] = useState([]);
@@ -20,14 +20,15 @@ const Dashboard = () => {
       return;
     }
 
-    // Decode JWT to get user email
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      setUserEmail(payload.email || 'User');
-    } catch (error) {
-      console.error('Error decoding token:', error);
-      setUserEmail('User');
-    }
+    // Fetch username from backend
+    api.get('/api/me/')
+      .then(res => {
+        setUsername(res.data.username || 'User');
+      })
+      .catch(err => {
+        console.error('Error fetching user info:', err);
+        setUsername('User');
+      });
 
     // Fetch dashboard data
     fetchDashboardData();
@@ -100,7 +101,7 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {userEmail}!
+            Welcome back, {username}!
           </h1>
           <p className="text-gray-600">Discover and manage your development resources</p>
         </div>
@@ -137,7 +138,7 @@ const Dashboard = () => {
           )}
         </section>
 
-        {/* Bookmarked Drops Section */}
+        {/* Bookmarked Drops Section
         {bookmarkedDrops.length > 0 && (
           <section className="mb-12">
             <div className="flex items-center justify-between mb-6">
@@ -163,7 +164,7 @@ const Dashboard = () => {
               </div>
             </div>
           </section>
-        )}
+        )} */}
 
         {/* Upcoming Drops Section */}
         {upcomingDrops.length > 0 && (
@@ -196,16 +197,6 @@ const Dashboard = () => {
             </div>
           </section>
         )}
-
-        {/* Logout Button */}
-        <div className="text-center pt-8">
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 ease-in-out"
-          >
-            Logout
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('me/', views.current_user, name='current-user'),
     
     path('drops/released/', views.ReleasedDropsView.as_view(), name='released-drops'),
     path('drops/upcoming/', views.UpcomingDropsView.as_view(), name='upcoming-drops'),
