@@ -1,15 +1,16 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import api from '../api/axios';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-const Register = () => {
+function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
+    username: "",
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState('');
+
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -21,102 +22,84 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
-      await api.post('/api/register/', formData);
-      navigate('/login');
+      // 1️⃣ Register the user
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/register/`,
+        formData
+      );
+
+      // 2️⃣ Auto-login after successful registration
+      const loginRes = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/token/`,
+        {
+          username: formData.username,
+          password: formData.password,
+        }
+      );
+
+      // 3️⃣ Save tokens in localStorage
+      localStorage.setItem("access", loginRes.data.access);
+      localStorage.setItem("refresh", loginRes.data.refresh);
+
+      // 4️⃣ Redirect to dashboard (or home)
+      navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+      if (err.response?.data) {
+        setError(JSON.stringify(err.response.data));
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-gray-600">Join DropZone and start sharing resources</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Choose a username"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter your email"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Create a password"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 ease-in-out"
-          >
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
-              Sign in here
-            </Link>
-          </p>
-        </div>
-      </div>
+    <div className="max-w-md mx-auto p-6 bg-white shadow rounded">
+      <h2 className="text-2xl font-bold mb-4">Register</h2>
+      {error && <div className="text-red-500 mb-3">{error}</div>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          className="w-full p-2 border rounded"
+          value={formData.username}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          className="w-full p-2 border rounded"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          className="w-full p-2 border rounded"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white p-2 rounded"
+          disabled={loading}
+        >
+          {loading ? "Creating Account..." : "Register"}
+        </button>
+      </form>
     </div>
   );
-};
+}
 
-export default Register; 
+export default Register;
