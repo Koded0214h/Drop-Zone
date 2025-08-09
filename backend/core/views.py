@@ -110,9 +110,9 @@ class DropDownloadView(APIView):
 
     def get(self, request, drop_id):
         try:
-            drop = Drop.objects.get(id=drop_id)
-        except Drop.DoesNotExist:
-            raise Http404("Drop not found.")
+            drop = get_object_or_404(Drop, pk=drop_id)
+        except Http404:
+            return Response({"error": "Drop not found."}, status=404)
 
         # Check if the drop is released
         if timezone.now() < drop.release_time:
@@ -124,10 +124,24 @@ class DropDownloadView(APIView):
 
         # Serve the file
         file_path = drop.file.path
+        
+        # Determine the file's content type
         content_type, _ = mimetypes.guess_type(file_path)
-        response = FileResponse(open(file_path, 'rb'), content_type=content_type)
-        response['Content-Disposition'] = f'attachment; filename="{drop.file.name.split("/")[-1]}"'
-        return response
+        if content_type is None:
+            content_type = 'application/octet-stream' # Fallback for unknown types
+
+        # Use os.path.basename to get a safe filename for the attachment
+        filename = os.path.basename(drop.file.name)
+        
+        try:
+            response = FileResponse(open(file_path, 'rb'), content_type=content_type)
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            return response
+        except FileNotFoundError:
+            return Response({"error": "File not found on the server."}, status=404)
+        except Exception as e:
+            # You might want to log this error
+            return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
     
 # 5. Get All Bookmarked Drops
 class BookmarkedDropsView(generics.ListAPIView):
