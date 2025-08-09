@@ -33,7 +33,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.onrender.com',  # For Render deployment
-    'https://drop-zone-backend.onrender.com/'
+    'https://drop-zone-backend.onrender.com/',
+    "Koded0214h.pythonanywhere.com"
 ]
 
 
