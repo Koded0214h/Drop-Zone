@@ -114,34 +114,34 @@ class DropDownloadView(APIView):
         except Http404:
             return Response({"error": "Drop not found."}, status=404)
 
-        # Check if the drop is released
         if timezone.now() < drop.release_time:
             return Response({"error": "This drop is not yet released."}, status=403)
 
-        # Check if the drop has a file
         if not drop.file:
             return Response({"error": "No file attached to this drop."}, status=404)
 
-        # Serve the file
         file_path = drop.file.path
-        
-        # Determine the file's content type
-        content_type, _ = mimetypes.guess_type(file_path)
-        if content_type is None:
-            content_type = 'application/octet-stream' # Fallback for unknown types
-
-        # Use os.path.basename to get a safe filename for the attachment
         filename = os.path.basename(drop.file.name)
         
+        # Determine content type
+        if file_path.lower().endswith('.pdf'):
+            content_type = 'application/pdf'
+        else:
+            content_type, _ = mimetypes.guess_type(file_path)
+            if content_type is None:
+                content_type = 'application/octet-stream'
+
         try:
-            response = FileResponse(open(file_path, 'rb'), content_type=content_type)
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            return response
+            # Using context manager to ensure file handle is closed
+            with open(file_path, 'rb') as file:
+                response = FileResponse(file, content_type=content_type)
+                response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                return response
         except FileNotFoundError:
             return Response({"error": "File not found on the server."}, status=404)
         except Exception as e:
-            # You might want to log this error
-            return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+            logger.error(f"Error serving file: {str(e)}")  # Make sure to import logging
+            return Response({"error": "An error occurred while processing your request."}, status=500)
     
 # 5. Get All Bookmarked Drops
 class BookmarkedDropsView(generics.ListAPIView):
