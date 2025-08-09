@@ -1,105 +1,88 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
-function Register() {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
-
+const Register = ({ onLoginSuccess }) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
     try {
-      // 1️⃣ Register the user
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/register/`,
-        formData
-      );
+      // 1. Register user
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/register/`, {
+        username,
+        password,
+      });
 
-      // 2️⃣ Auto-login after successful registration
-      const loginRes = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/token/`,
+      // 2. Auto login after successful registration
+      const loginResponse = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/login/`,
         {
-          username: formData.username,
-          password: formData.password,
+          username,
+          password,
         }
       );
 
-      // 3️⃣ Save tokens in localStorage
-      localStorage.setItem("access", loginRes.data.access);
-      localStorage.setItem("refresh", loginRes.data.refresh);
+      localStorage.setItem("token", loginResponse.data.token);
 
-      // 4️⃣ Redirect to dashboard (or home)
-      navigate("/dashboard");
-    } catch (err) {
-      if (err.response?.data) {
-        setError(JSON.stringify(err.response.data));
-      } else {
-        setError("Something went wrong. Please try again.");
+      // 3. Call success handler (optional)
+      if (onLoginSuccess) {
+        onLoginSuccess();
       }
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      setError("Registration or login failed");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow rounded">
-      <h2 className="text-2xl font-bold mb-4">Register</h2>
-      {error && <div className="text-red-500 mb-3">{error}</div>}
+    <div className="max-w-md mx-auto mt-10 p-6 border border-gray-300 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+      {error && (
+        <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
-          name="username"
           placeholder="Username"
-          className="w-full p-2 border rounded"
-          value={formData.username}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          className="w-full p-2 border rounded"
-          value={formData.email}
-          onChange={handleChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
         <input
           type="password"
-          name="password"
           placeholder="Password"
-          className="w-full p-2 border rounded"
-          value={formData.password}
-          onChange={handleChange}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded"
-          disabled={loading}
+          className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
         >
-          {loading ? "Creating Account..." : "Register"}
+          Register
         </button>
       </form>
     </div>
   );
-}
+};
 
 export default Register;
