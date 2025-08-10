@@ -1,4 +1,4 @@
-import mimetypes, os, logging
+import mimetypes, os, logger
 
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.models import User
