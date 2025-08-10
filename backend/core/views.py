@@ -105,6 +105,10 @@ class ToggleBookmarkView(APIView):
             return Response({"message": "Bookmark removed."}, status=status.HTTP_200_OK)
         return Response({"message": "Bookmarked!"}, status=status.HTTP_201_CREATED)
 
+from django.http import HttpResponse
+import os
+import mimetypes
+
 class DropDownloadView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -122,25 +126,27 @@ class DropDownloadView(APIView):
 
         file_path = drop.file.path
         filename = os.path.basename(drop.file.name)
-        
-        # Determine content type
+
+        # Force PDF content type if extension matches
         if file_path.lower().endswith('.pdf'):
             content_type = 'application/pdf'
         else:
-            content_type, _ = mimetypes.guess_type(file_path)
-            if content_type is None:
-                content_type = 'application/octet-stream'
+            content_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
 
         try:
-            # Using context manager to ensure file handle is closed
-            with open(file_path, 'rb') as file:
-                response = FileResponse(file, content_type=content_type)
+            # Read the file in binary mode
+            with open(file_path, 'rb') as fh:
+                response = HttpResponse(fh.read(), content_type=content_type)
                 response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                # Additional headers to prevent modification
+                response['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+                response['Pragma'] = 'no-cache'
+                response['Expires'] = '0'
                 return response
-        except FileNotFoundError:
+        except IOError:
             return Response({"error": "File not found on the server."}, status=404)
         except Exception as e:
-            logger.error(f"Error serving file: {str(e)}")  # Make sure to import logging
+            logger.error(f"File download error: {str(e)}")
             return Response({"error": "An error occurred while processing your request."}, status=500)
     
 # 5. Get All Bookmarked Drops
