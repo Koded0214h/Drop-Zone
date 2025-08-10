@@ -105,18 +105,15 @@ class ToggleBookmarkView(APIView):
             return Response({"message": "Bookmark removed."}, status=status.HTTP_200_OK)
         return Response({"message": "Bookmarked!"}, status=status.HTTP_201_CREATED)
 
-from django.http import HttpResponse
-import os
+from django.http import FileResponse
 import mimetypes
+import os
 
 class DropDownloadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, drop_id):
-        try:
-            drop = get_object_or_404(Drop, pk=drop_id)
-        except Http404:
-            return Response({"error": "Drop not found."}, status=404)
+        drop = get_object_or_404(Drop, pk=drop_id)
 
         if timezone.now() < drop.release_time:
             return Response({"error": "This drop is not yet released."}, status=403)
@@ -125,29 +122,21 @@ class DropDownloadView(APIView):
             return Response({"error": "No file attached to this drop."}, status=404)
 
         file_path = drop.file.path
-        filename = os.path.basename(drop.file.name)
+        filename = os.path.basename(file_path)
 
-        # Force PDF content type if extension matches
-        if file_path.lower().endswith('.pdf'):
-            content_type = 'application/pdf'
-        else:
-            content_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
-
-        try:
-            # Read the file in binary mode
-            with open(file_path, 'rb') as fh:
-                response = HttpResponse(fh.read(), content_type=content_type)
-                response['Content-Disposition'] = f'attachment; filename="{filename}"'
-                # Additional headers to prevent modification
-                response['Cache-Control'] = 'no-store, no-cache, must-revalidate'
-                response['Pragma'] = 'no-cache'
-                response['Expires'] = '0'
-                return response
-        except IOError:
+        if not os.path.exists(file_path):
             return Response({"error": "File not found on the server."}, status=404)
-        except Exception as e:
-            logger.error(f"File download error: {str(e)}")
-            return Response({"error": "An error occurred while processing your request."}, status=500)
+
+        # Detect the content type
+        content_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
+
+        # Use FileResponse for binary-safe streaming
+        response = FileResponse(open(file_path, 'rb'), content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
     
 # 5. Get All Bookmarked Drops
 class BookmarkedDropsView(generics.ListAPIView):
