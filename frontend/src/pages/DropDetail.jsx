@@ -36,15 +36,28 @@ const DropDetail = () => {
       const response = await api.get(`/api/drops/${id}/download/`, {
         responseType: 'blob'
       });
-      
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+  
+      // Extract filename from headers or fallback
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = drop.title || 'drop-file.pdf';
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match && match[1]) {
+          fileName = match[1];
+        }
+      }
+  
+      // Create Blob with correct type
+      const fileBlob = new Blob([response.data], { type: response.data.type || 'application/pdf' });
+  
+      // Create link and download
+      const url = window.URL.createObjectURL(fileBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', drop.title || 'drop-file');
+      link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
-      link.remove();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Error downloading file:', err);
